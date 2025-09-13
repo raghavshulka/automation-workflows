@@ -4,11 +4,13 @@ import {
   type ToolSet,
   UIMessage,
   convertToModelMessages,
+  experimental_generateImage,
   stepCountIs,
   streamText,
   tool,
 } from "ai";
 import { z } from "zod";
+
 
 function calculateSum(a: number, b: number) {
   return a + b;
@@ -86,6 +88,21 @@ const tools = {
       return result;
     },
   }),
+
+  generate_image: tool({
+    description: 'Generate an image',
+    inputSchema: z.object({
+      prompt: z.string().describe('The prompt to generate the image from'),
+    }),
+    execute: async ({ prompt }) => {
+      const { image } = await experimental_generateImage({
+        model: google.imageModel('imagen-4.0-generate-001'),
+        prompt,
+      });
+      return { image: image.base64, prompt };
+    },
+  })
+
 } satisfies ToolSet;
 
 export type ChatTools = InferUITools<typeof tools>;
@@ -95,7 +112,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google("gemini-2.5-flash"),
-    system:"you support chat and  tools call and rag chat",
+    system:"you support chat and  tools call and rag chat and genrate images",
     prompt: convertToModelMessages(messages),
     tools,
     stopWhen: stepCountIs(5), 

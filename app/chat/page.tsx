@@ -10,6 +10,7 @@ import { DefaultChatTransport } from 'ai';
 import { useRef, useState } from 'react';
 import { Send, Paperclip, X } from 'lucide-react';
 import Markdown from 'react-markdown';
+import Image from 'next/image';
 
 async function convertFilesToDataURLs(
     files: FileList,
@@ -179,9 +180,22 @@ export default function Chat() {
                                                                             <p>{(part?.output)}</p>
                                                                         </div>
                                                                     );
-                                                                else return null
+                                                                else if (part.type == 'generate_image') {
+                                                                    const { input, output , toolCallId } = part;
+
+                                                                    return (
+                                                                        <Image
+                                                                            key={toolCallId}
+                                                                            src={`data:image/png;base64,${output.image}`}
+                                                                            alt={input.prompt}
+                                                                            height={400}
+                                                                            width={400}
+                                                                        />
+                                                                    );
+                                                                }
 
                                                             })}
+                                                            else return null
                                                         </div>
                                                     </div>
                                                 </CardContent>
