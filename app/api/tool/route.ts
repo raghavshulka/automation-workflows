@@ -95,8 +95,10 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google("gemini-2.5-flash"),
+    system:"you support chat and  tools call and rag chat",
     prompt: convertToModelMessages(messages),
     tools,
+    stopWhen: stepCountIs(5), 
   });
 
   return result.toUIMessageStreamResponse();
