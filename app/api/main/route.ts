@@ -6,7 +6,7 @@ import {
   streamText,
   tool,
 } from "ai";
-import {  z } from "zod";
+import { z } from "zod";
 
 function calculateSum(a: number, b: number) {
   return a + b;
