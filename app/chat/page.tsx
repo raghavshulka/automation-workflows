@@ -46,7 +46,7 @@ export default function Chat() {
 
     const { messages, sendMessage } = useChat({
         transport: new DefaultChatTransport({
-            api: '/api/pdfChat',
+            api: '/api/tool',
         }),
     });
 
@@ -104,10 +104,10 @@ export default function Chat() {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5"></div>
                 <div className="relative container mx-auto px-6 py-6">
                     <h1 className="text-2xl text-center font-bold text-white/90 tracking-wide">
-                        RAG Chat
+                        RAG/Chat/toolcalling
                     </h1>
                     <p className="text-sm text-center text-white/70 mt-1">
-                        Upload files and chat with AI
+                        chat with gemini pro
                     </p>
                 </div>
             </div>
@@ -134,7 +134,6 @@ export default function Chat() {
                                             ? 'ml-auto max-w-[85%]'
                                             : 'mr-auto max-w-[85%]'
                                             }`}>
-                                            {/* Glass card background glow */}
                                             <div className={`absolute -inset-1 rounded-2xl blur-sm ${message.role === 'user'
                                                 ? 'bg-gradient-to-r from-gray-800/20 to-gray-500/20'
                                                 : 'bg-gradient-to-r from-gray-800/20 to-gray-500/20'
@@ -158,20 +157,29 @@ export default function Chat() {
                                                             {message.role === 'user' ? 'U' : 'AI'}
                                                         </div>
                                                         <div className="flex-1 space-y-3">
-                                                            {message.parts.map((part, index) => {
-                                                                if (part.type === 'text') {
+                                                            {message.parts.map((part: any, i) => {
+                                                                if (part.type == 'text')
+                                                                    return <div
+                                                                        className="text-gray-300 leading-relaxed prose-headings:text-white/90 "
+                                                                        key={`${message.id}-text`}>
+                                                                        <Markdown >
+                                                                            {part.text}
+                                                                        </Markdown>
+                                                                    </div>;
+                                                                else if (part.type.includes('tool'))
                                                                     return (
                                                                         <div
-                                                                            key={`${message.id}-text-${index}`}
                                                                             className="text-gray-300 leading-relaxed prose-headings:text-white/90 "
-                                                                        >
-                                                                            <Markdown>
-                                                                                {part.text}
-                                                                            </Markdown>
+                                                                            key={`${message.id}-weather-${i}`}>
+                                                                            <p>
+                                                                                <strong>Tool Calling</strong> : {part?.type}
+                                                                            </p>
+
+                                                                            <p>{(part?.output)}</p>
                                                                         </div>
                                                                     );
-                                                                }
-                                                                return null;
+                                                                else return null
+
                                                             })}
                                                         </div>
                                                     </div>
@@ -222,7 +230,6 @@ export default function Chat() {
                         </div>
                     )}
 
-                    {/* Input Form with Glass Effect */}
                     <div className="flex gap-4">
                         <input
                             type="file"
