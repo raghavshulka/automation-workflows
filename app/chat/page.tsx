@@ -122,8 +122,9 @@ export default function Chat() {
                                     <div className="relative">
                                         <div className="absolute inset-0 bg-gradient-to-r from-gray-500/20 via-gray-500/20 to-gray-500/20 rounded-2xl blur-xl"></div>
                                         <div className="relative bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-12">
-                                            <div className="text-white/90 text-2xl font-semibold mb-4">Welcome to RAG Chat</div>
-                                            <div className="text-white/60 text-base">Upload files and start an intelligent conversation</div>
+                                            <div className="text-white/90 text-2xl font-semibold mb-4">welcome</div>
+                                            <div className="text-white/60 text-base">RAG/Chat/toolcalling
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
