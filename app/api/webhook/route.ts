@@ -1,4 +1,9 @@
+import { handleAIRequest } from "@/app/lib/model";
+import { UIMessage } from "ai";
+import { AirVent } from "lucide-react";
 import { NextRequest, NextResponse } from "next/server";
+import { promise } from "zod";
+import { da } from "zod/v4/locales";
 interface TelegramUser {
   id: number;
   is_bot: boolean;
@@ -61,7 +66,6 @@ export async function setupWebhook(webhookUrl: string) {
 export async function POST(request: NextRequest) {
   try {
     const update: TelegramUpdate = await request.json();
-    console.log("Received update:", update);
     if (update.message) {
       await handleMessage(update.message);
     }
@@ -73,10 +77,30 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Send message to Telegram
-async function sendMessage(chatId: number, text: string) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+async function handleMessage(message: TelegramMessage) {
+  if (!message.text) return;
+  const uiMessages: UIMessage[] = [
+    {
+      id: String(message.message_id),
+      role: "user",
+      parts: [
+        {
+          type: "text",
+          text: message.text ?? "",
+          state: "done",
+        },
+      ],
+    },
+  ];
 
+  const aiResponse = await handleAIRequest(uiMessages,'telegram');
+
+  await sendMessage(message.chat.id, aiResponse);
+}
+
+// Send message to Telegram
+async function sendMessage(chatId: number, data: any) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
     console.error("TELEGRAM_BOT_TOKEN is not set");
     return;
@@ -84,13 +108,25 @@ async function sendMessage(chatId: number, text: string) {
 
   const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
+  let text = "";
+  if (typeof data === "string") {
+    text = data;
+  } else if (data?.message?.content) {
+    // case: AI returns UIMessage
+    text = data.message.content
+      .map((c: any) => (c.type === "text" ? c.text : ""))
+      .join(" ");
+  } else {
+    text = JSON.stringify(data);
+  }
+
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: chatId,
-        text: text,
+        text,
       }),
     });
 
@@ -101,7 +137,6 @@ async function sendMessage(chatId: number, text: string) {
     }
 
     const result = await response.json();
-    console.log("Message sent successfully");
     return result;
   } catch (error) {
     console.error("Error sending message:", error);
@@ -114,20 +149,4 @@ export async function GET() {
     message: "Telegram webhook is running",
     timestamp: new Date().toISOString(),
   });
-}
-async function handleMessage(message: TelegramMessage) {
-  const chatId = message.chat.id;
-  const text = message.text;
-  const user = message.from;
-
-  console.log(`Message from ${user.first_name}: ${text}`);
-
-  if (text === "/start") {
-    await sendMessage(
-      chatId,
-      `Hello ${user.first_name}! Send me any message and I'll echo it back.`
-    );
-  } else if (text) {
-    await sendMessage(chatId, `You said: ${text}`);
-  }
 }

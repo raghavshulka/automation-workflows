@@ -1,3 +1,4 @@
+import { handleAIRequest } from "@/app/lib/model";
 import { google } from "@ai-sdk/google";
 import {
   type InferUITools,
@@ -27,7 +28,7 @@ function calculateexp(a: number, b: number) {
   return a ^ b;
 }
 
-const tools = {
+export const tools = {
   sum: tool({
     description: "have to calculate sum of numbers ",
     inputSchema: z.object({
@@ -108,13 +109,5 @@ export type ChatTools = InferUITools<typeof tools>;
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
-  const result = streamText({
-    model: google("gemini-2.5-flash"),
-    system: "you support chat and  tools call and rag chat and genrate images",
-    prompt: convertToModelMessages(messages),
-    tools,
-    stopWhen: stepCountIs(5),
-  });
-
-  return result.toUIMessageStreamResponse();
+  return handleAIRequest(messages,'web');
 }
