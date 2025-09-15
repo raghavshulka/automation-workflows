@@ -14,6 +14,10 @@ pnpm dev
 bun dev
 ```
 
+
+steps
+-->bot token(botfather)->env->ngrock(http->https)->webhook(token+https:linksetup{example-https://api.telegram.org/bot<tokenhere>/setWebhook} and in body url  ex ({"url": "https://904fb084942d.ngrok-free.app/api/webhook"})->done
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
